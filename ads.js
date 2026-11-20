@@ -3,8 +3,12 @@
    Yahan apne Adsterra dashboard se copy kiye hue code paste karo.
    Jo khaali chhod doge, uski ad jagah page par dikhegi hi nahi.
 
+   Ad load na ho (site approve nahi hai, ad-blocker on hai, internet
+   dheema hai) to bhi khaali safed dabba nahi dikhega — wo jagah poori
+   tarah chhup jayegi.
+
    Preview ke liye: index.html?adspreview khol lo — tab khaali
-   jagahon par "Ad space" ka dabba dikhega.
+   jagahon par \"Ad space\" ka dabba dikhega.
    ------------------------------------------------------------------ */
 (function () {
   'use strict';
@@ -60,6 +64,9 @@
     'ad-bottom': [300, 250]
   };
 
+  /* ad load hui ya nahi — har slot ka haal yaad rakhte hain */
+  var state = {};
+
   function isVisible(el) {
     return !!el && window.getComputedStyle(el).display !== 'none';
   }
@@ -70,13 +77,83 @@
      kare, hamara game safe rehta hai. atOptions bhi tab conflict nahi karta. */
   function frameDoc(code) {
     return '<!DOCTYPE html><html><head><meta charset="utf-8">' +
-      '<style>html,body{margin:0;padding:0;overflow:hidden;background:#fff}' +
+      '<style>html,body{margin:0;padding:0;overflow:hidden;background:transparent}' +
       'iframe{border:0;display:block}</style></head><body>' + code + '</body></html>';
+  }
+
+  /* ad ke frame ke andar kuch asli cheez (banner image/iframe) aayi hai? */
+  function hasCreative(doc) {
+    if (!doc || !doc.body) return false;
+    var kids = doc.body.children;
+    for (var i = 0; i < kids.length; i++) {
+      var el = kids[i];
+      if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE' || el.tagName === 'LINK') continue;
+      if (el.offsetWidth > 4 && el.offsetHeight > 4) return true;
+    }
+    return false;
+  }
+
+  /* Frame ko chhupayi hui jagah par load karte hain, aur jab andar asli
+     banner ban jaye tabhi uski jagah kholte hain. Ad na aaye (403 /
+     ad-blocker / slow net) to jagah khaali chhodne ke bajaye hata dete hain. */
+  function watch(box, frame, id) {
+    var settled = false;
+    var started = Date.now();
+
+    function hide() {
+      if (settled) return;
+      settled = true;
+      state[id] = 'failed';
+      box.classList.remove('loading', 'ok');
+      box.classList.add('empty');
+      if (frame.parentNode) frame.parentNode.removeChild(frame);
+      box.style.width = '';
+      box.style.height = '';
+      box.style.margin = '';
+    }
+
+    function show() {
+      if (settled) return;
+      settled = true;
+      state[id] = 'ok';
+      box.classList.remove('loading');
+      box.classList.add('ok');
+    }
+
+    function check() {
+      if (settled) return;
+      var doc;
+      try {
+        doc = frame.contentDocument;
+      } catch (e) {
+        /* andar ki document padh nahi sakte — ad ko dikne do */
+        return show();
+      }
+      if (doc && hasCreative(doc)) return show();
+      if (Date.now() - started > 9000) hide();
+    }
+
+    frame.addEventListener('load', function () {
+      setTimeout(check, 200);
+      setTimeout(check, 1200);
+    });
+    var timer = setInterval(function () {
+      check();
+      if (settled) clearInterval(timer);
+    }, 400);
   }
 
   function place(id, code, label) {
     var box = document.getElementById(id);
     if (!box) return;
+
+    /* ad pehle se ok hai, ya do baar fail ho chuki hai — chhed nahi karte */
+    if (state[id] === 'ok') return;
+    if (state[id] === 'failed') {
+      box.classList.remove('loading', 'ok', 'placeholder');
+      box.classList.add('empty');
+      return;
+    }
 
     var hasFrame = !!box.querySelector('iframe');
 
@@ -134,7 +211,10 @@
       box.style.margin = '0 auto 14px';
     }
 
+    /* jab tak ad ka pata na chale, jagah zero rakho — safed dabba nahi */
+    box.classList.add('loading');
     box.appendChild(frame);
+    watch(box, frame, id);
   }
 
   function socialBar() {
