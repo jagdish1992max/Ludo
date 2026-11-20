@@ -24,10 +24,28 @@
 <script src="https://bicea.org/22/761ef6cd0c847f71e4ba6fe0f4629673"></script>`;
 
   /* 2. Top banner — mobile (320x50) */
-  var AD_TOP_MOBILE = ``;
+  var AD_TOP_MOBILE = `<script type="text/javascript">
+  atOptions = {
+    'key' : '24ec949657bafd91d0a86f0ce4b7b191',
+    'format' : 'iframe',
+    'height' : 50,
+    'width' : 320,
+    'params' : {}
+  };
+</script>
+<script src="https://bicea.org/22/24ec949657bafd91d0a86f0ce4b7b191"></script>`;
 
   /* 3. Bottom banner (300x250) */
-  var AD_BOTTOM = ``;
+  var AD_BOTTOM = `<script type="text/javascript">
+  atOptions = {
+    'key' : 'f8680d4d0e1e0c8a7ee1101d8b335d74',
+    'format' : 'iframe',
+    'height' : 250,
+    'width' : 300,
+    'params' : {}
+  };
+</script>
+<script src="https://bicea.org/22/f8680d4d0e1e0c8a7ee1101d8b335d74"></script>`;
 
   /* 4. Social Bar — page ke bottom wala code */
   var AD_SOCIAL_BAR = ``;
@@ -60,9 +78,17 @@
     var box = document.getElementById(id);
     if (!box) return;
 
-    if (!code.trim() || !isVisible(box)) {
+    var hasFrame = !!box.querySelector('iframe');
+
+    /* apni hi hide-classes hata ke dekho, layout me is slot ki jagah hai ya
+       nahi (warna chhupaya hua slot khud ko dobara chhupa hi rakhega) */
+    box.classList.remove('empty', 'placeholder');
+    var visible = isVisible(box);
+
+    if (!code.trim()) {
+      if (hasFrame) return;
       box.textContent = '';
-      if (!code.trim() && SHOW_EMPTY) {
+      if (SHOW_EMPTY && visible) {
         box.textContent = label;
         box.classList.add('placeholder');
       } else {
@@ -70,6 +96,19 @@
       }
       return;
     }
+
+    /* screen chhoti hai (ya box chhupa hua hai) to abhi ad mat banao.
+       Baad me screen badi ho jaye to resize handle ise bana dega. */
+    if (!visible) {
+      if (!hasFrame) {
+        box.textContent = '';
+        box.classList.add('empty');
+      }
+      return;
+    }
+
+    if (hasFrame) return;   /* ad pehle se load hai — dobara load nahi karte */
+    box.textContent = '';
 
     var size = SIZES[id] || [300, 250];
     var w = size[0];
@@ -126,6 +165,17 @@
     place('ad-bottom', AD_BOTTOM, 'Ad space · 300×250');
     socialBar();
   }
+
+  /* phone se desktop (ya ulta) ghumane par sahi banner lag jaye */
+  var resizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      place('ad-top-desktop', AD_TOP_DESKTOP, 'Ad space · 728×90');
+      place('ad-top-mobile', AD_TOP_MOBILE, 'Ad space · 320×50');
+      place('ad-bottom', AD_BOTTOM, 'Ad space · 300×250');
+    }, 250);
+  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', start);
