@@ -46,6 +46,7 @@ Your game is live at `https://<your-username>.github.io/ludo/` in a minute or tw
 | `index.html` | Page structure: board, dice, player list, modals |
 | `style.css` | All styling and the responsive layout |
 | `game.js` | Board drawing, rules engine, turn handling, animations |
+| `ads.js` | Adsterra ad slots — paste your own ad codes here |
 
 ## How the board is built
 
@@ -59,6 +60,41 @@ The board is an SVG on a 15×15 grid of 40-unit squares.
 A token's position is a single number: `-1` in the yard, `0…50` on the ring,
 `51…55` in the home lane, `56` home. Moving is just `pos += dice`, which keeps the
 rules code short and easy to change.
+
+## Ads (Adsterra)
+
+All the ad code lives in **`ads.js`**. The page already has the places ready:
+
+| Slot | Size | Where it shows |
+| --- | --- | --- |
+| `AD_TOP_DESKTOP` | 728×90 | Above the board, on wide screens |
+| `AD_TOP_MOBILE` | 320×50 | Above the board, on phones |
+| `AD_BOTTOM` | 300×250 | Below the board |
+| `AD_SOCIAL_BAR` | — | Social Bar, loads at the bottom of the page |
+
+### Steps
+
+1. **Publish first.** Adsterra checks your live site before giving you code, so put the game
+   online (GitHub Pages is fine).
+2. Sign up at [adsterra.com](https://adsterra.com) as a **Publisher** and add your site
+   (`username.github.io/ludo` style URLs can be rejected — a cheap custom domain is the safe bet).
+3. Request the ad units above (Banner 728×90, 320×50, 300×250 and Social Bar).
+4. When a unit shows **Approved**, click **Get code** and copy everything it gives you.
+5. Open `ads.js` and paste it between the backticks, e.g.
+
+   ```js
+   var AD_TOP_DESKTOP = `<script type="text/javascript">
+     atOptions = { 'key' : 'YOUR_KEY', 'format' : 'iframe', 'height' : 90, 'width' : 728, 'params' : {} };
+   </script>
+   <script src="//www.highperformanceformat.com/YOUR_KEY/invoke.js"></script>`;
+   ```
+
+6. Push the change. Slots you leave empty simply don't appear, so nothing breaks.
+
+To see the empty boxes while building, open `index.html?adspreview`.
+
+> Never click your own ads — that gets accounts banned. Keep it to 4 banners per page,
+> which this layout already does.
 
 ## Things you could add
 

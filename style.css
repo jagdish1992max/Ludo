@@ -323,7 +323,142 @@ kbd {
 .counts button:hover { background: #eef4fb; border-color: #b9cbe2; }
 .counts button:active { transform: scale(0.985); }
 
+/* ---------- scoreboard ---------- */
+
+.scores {
+  background: #f7f9fc;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 11px;
+}
+
+.scores-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.link {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #2b6fd0;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.link:hover { text-decoration: underline; }
+
+.score-rows { display: flex; flex-direction: column; gap: 5px; }
+
+.srow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 7px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.8);
+  font-size: 12.5px;
+}
+
+.srow.best {
+  border-color: #f0b429;
+  background: #fffaf0;
+}
+
+.srow .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--c);
+  flex: 0 0 auto;
+}
+
+.srow .sname { font-weight: 700; }
+
+.srow .swins {
+  margin-left: auto;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.srow.best .swins { color: #7a4b00; font-weight: 700; }
+
+/* ---------- celebration ---------- */
+
+#confetti {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 30;
+}
+
+.win-card { text-align: center; }
+
+.trophy {
+  font-size: 46px;
+  line-height: 1;
+  margin-bottom: 4px;
+  animation: bounce 1s ease-in-out infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.win-scores { margin: 0 0 16px; text-align: left; }
+.win-actions { display: grid; gap: 8px; }
+
 /* ---------- responsive ---------- */
+
+/* ---------- ad slots (Adsterra) ---------- */
+
+.ad-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 2px 14px;
+  overflow: hidden;
+}
+
+#ad-bottom { margin: 14px 2px 0; }
+
+.ad-mobile { display: none; }
+
+.ad-slot img,
+.ad-slot iframe { max-width: 100%; }
+
+.ad-slot.placeholder {
+  display: flex;
+  min-height: 90px;
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ad-slot.empty { display: none; }
+
+@media (max-width: 760px) {
+  .ad-desktop { display: none; }
+  .ad-mobile { display: flex; }
+  .ad-slot.placeholder { min-height: 50px; }
+}
 
 @media (max-width: 860px) {
   .layout { grid-template-columns: 1fr; gap: 14px; }
@@ -334,5 +469,7 @@ kbd {
   .dice { width: 58px; height: 58px; }
   .status { min-height: 0; }
   .hint { display: none; }
+  .score-rows { flex-direction: row; flex-wrap: wrap; }
+  .srow { flex: 1 1 128px; }
   .topbar h1 { font-size: 22px; }
 }
